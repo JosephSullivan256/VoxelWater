@@ -23,15 +23,19 @@ import com.josephsullivan256.gmail.util.Pair;
 public class LevelRenderer {
 	
 	private Consumer<Pair<Matrix,Matrix>> drawVao0;
-	private Consumer<Pair<Matrix,Matrix>> drawVao1;
+	private BufferObject vbo0;
+	private int length;
 	
-	public LevelRenderer(Level3D lvl, SceneInfo si, Shader blockShader, Shader wallShader, Texture tex){
+	public LevelRenderer(Level lvl, SceneInfo si, Shader blockShader, Texture tex){
 		
 		float[] cubeVertices = Geometry.cubeVertices;
 		
 		VertexArrayObject vao0 = new VertexArrayObject();
-		Vec3[] offsets0 = offsetsFromLevel(lvl.getInterior());
+		Vec3[] offsets0 = offsetsFromLevel(lvl.filled());
+		length = offsets0.length;
 		{
+			vbo0 = BufferObject.vbo().bind().bufferData(offsets0, GL15.GL_DYNAMIC_DRAW); //maybe stream draw?
+			
 			vao0.initialize(
 					Pair.init(
 							BufferObject.vbo().bind().bufferData(cubeVertices, GL15.GL_STATIC_DRAW),
@@ -41,26 +45,7 @@ public class LevelRenderer {
 							.with(2, GL11.GL_FLOAT)
 							),
 					Pair.init(
-							BufferObject.vbo().bind().bufferData(offsets0, GL15.GL_STATIC_DRAW),
-							new VertexAttributes()
-							.withInstanced(3, GL11.GL_FLOAT)
-							)
-					);
-		}
-		
-		VertexArrayObject vao1 = new VertexArrayObject();
-		Vec3[] offsets1 = offsetsFromLevel(lvl.getWalls());
-		{
-			vao1.initialize(
-					Pair.init(
-							BufferObject.vbo().bind().bufferData(cubeVertices, GL15.GL_STATIC_DRAW),
-							new VertexAttributes()
-							.with(3, GL11.GL_FLOAT)
-							.with(3, GL11.GL_FLOAT)
-							.with(2, GL11.GL_FLOAT)
-							),
-					Pair.init(
-							BufferObject.vbo().bind().bufferData(offsets1, GL15.GL_STATIC_DRAW),
+							vbo0,//BufferObject.vbo().bind().bufferData(offsets0, GL15.GL_STATIC_DRAW),
 							new VertexAttributes()
 							.withInstanced(3, GL11.GL_FLOAT)
 							)
@@ -91,24 +76,8 @@ public class LevelRenderer {
 			tex.assignToUnit(0);
 			
 			//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-			vao0.drawArraysInstanced(Geometry.cubeVertices.length/8, offsets0.length);
+			vao0.drawArraysInstanced(Geometry.cubeVertices.length/8, length);
 			vao0.unbind();
-		};
-		
-		drawVao1 = (m)->{
-			vao1.bind();
-			wallShader.use();
-			
-			//uniforms
-			transformUniform.uniform(m.a, wallShader);
-			perspectiveUniform.uniform(m.b, wallShader);
-			
-			//assign texture to unit
-			tex.assignToUnit(0);
-			
-			//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-			vao1.drawArraysInstanced(Geometry.cubeVertices.length/8, offsets1.length);
-			vao1.unbind();
 		};
 		
 		//initial uniforms
@@ -118,31 +87,29 @@ public class LevelRenderer {
 		sunAmbient.uniform(si.sun.amb, blockShader);
 		sunDiffuse.uniform(si.sun.diff, blockShader);
 		sunSpecular.uniform(si.sun.spec, blockShader);
-		
-		wallShader.use();
-		texUniform.uniform(0, wallShader);
-		sunDirection.uniform(si.sun.dir, wallShader);
-		sunAmbient.uniform(si.sun.amb, wallShader);
-		sunDiffuse.uniform(si.sun.diff, wallShader);
-		sunSpecular.uniform(si.sun.spec, wallShader);
+	}
+	
+	public void update(float[][][] waterLevels){
+		Vec3[] offsets = offsetsFromLevel(waterLevels);
+		length = offsets.length;
+		vbo0.bufferSubData(offsets);
 	}
 	
 	public void render(Matrix viewModel, Matrix perspective){
 		Pair<Matrix,Matrix> vmp = Pair.init(viewModel, perspective);
 		
 		drawVao0.accept(vmp);
-		drawVao1.accept(vmp);
-		
-		
 	}
 	
-	public static Vec3[] offsetsFromLevel(boolean[][][] level){
+	private static final float scale = 1f;
+	
+	public static Vec3[] offsetsFromLevel(float[][][] level){
 		List<Vec3> offsets = new ArrayList<Vec3>();
 		
 		for(int x = 0; x < level.length; x++){
 			for(int y = 0; y < level[0].length; y++){
 				for(int z = 0; z < level[0][0].length; z++){
-					if(level[x][y][z]) offsets.add(new Vec3(x,y,z).scaledBy(1.2f));
+					if(level[x][y][z]>0.4f) offsets.add(new Vec3(x,y,z).scaledBy(scale));
 				}
 			}
 		}

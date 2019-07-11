@@ -35,6 +35,10 @@ public class Vec3i {
 		return sq == mag2()*v.mag2();
 	}
 	
+	public Vec3 vec3(){
+		return new Vec3(x,y,z);
+	}
+	
 	public boolean equals(Object obj){
 		Vec3i v = (Vec3i) obj;
 		return x==v.x && y==v.y && z==v.z;

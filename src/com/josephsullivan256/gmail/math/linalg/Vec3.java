@@ -68,6 +68,19 @@ public class Vec3 {
 		return "<"+x+","+y+","+z+">";
 	}
 	
+	public Vec3i ufr(){return new Vec3i((int)Math.ceil(x),(int)Math.ceil(y),(int)Math.ceil(z));}
+	public Vec3i ufl(){return new Vec3i((int)Math.floor(x),(int)Math.ceil(y),(int)Math.ceil(z));}
+	public Vec3i ubr(){return new Vec3i((int)Math.ceil(x),(int)Math.ceil(y),(int)Math.floor(z));}
+	public Vec3i ubl(){return new Vec3i((int)Math.floor(x),(int)Math.ceil(y),(int)Math.floor(z));}
+	public Vec3i dfr(){return new Vec3i((int)Math.ceil(x),(int)Math.floor(y),(int)Math.ceil(z));}
+	public Vec3i dfl(){return new Vec3i((int)Math.floor(x),(int)Math.floor(y),(int)Math.ceil(z));}
+	public Vec3i dbr(){return new Vec3i((int)Math.ceil(x),(int)Math.floor(y),(int)Math.floor(z));}
+	public Vec3i dbl(){return new Vec3i((int)Math.floor(x),(int)Math.floor(y),(int)Math.floor(z));}
+	
+	public float product(){
+		return x*y*z;
+	}
+	
 	public static final Vec3 zero = new Vec3(0,0,0);
 	public static final Vec3 i = new Vec3(1,0,0);
 	public static final Vec3 j = new Vec3(0,1,0);

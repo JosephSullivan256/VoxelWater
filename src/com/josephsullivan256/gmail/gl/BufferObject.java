@@ -5,6 +5,7 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 
 import java.nio.ByteBuffer;
 
+import org.lwjgl.opengl.GL15;
 import org.lwjgl.system.MemoryStack;
 
 import com.josephsullivan256.gmail.math.linalg.Vec3;
@@ -58,6 +59,11 @@ public class BufferObject {
 		return this;
 	}
 	
+	public BufferObject bufferSubData(float[] values, int offset) {
+		glBufferSubData(type,offset,values);
+		return this;
+	}
+	
 	public BufferObject bufferData(int[] values, int usage) {
 		glBufferData(type,values,usage);
 		return this;
@@ -73,6 +79,15 @@ public class BufferObject {
 		return this;
 	}
 	
+	public BufferObject bufferSubData(Vec3[] values) {
+		bufferData(vec3SubBufferer, values, 0);
+		return this;
+	}
+	
+	public BufferObject bufferSubData(Vec3[] values, int offset) {
+		return bufferSubData(values,offset);
+	}
+	
 	public BufferObject bufferData(Vec4[] values, int usage) {
 		bufferData(vec4Bufferer, values, usage);
 		return this;
@@ -84,7 +99,7 @@ public class BufferObject {
 	}
 	
 	public static interface DataBufferer<T>{
-		public void bufferData(BufferObject bo, T[] values, int usage);
+		public void bufferData(BufferObject bo, T[] values, int usage); //depending on context, usage is instead offset (for subdata)
 	}
 	
 	public static DataBufferer<Vec4> vec4Bufferer = (bo,values,usage)->{
@@ -110,5 +125,17 @@ public class BufferObject {
 		}
 		
 		bo.bufferData(floatValues, usage);
+	};
+	
+	public static DataBufferer<Vec3> vec3SubBufferer = (bo,values,offset)->{
+		float[] floatValues = new float[values.length*3];
+		
+		for(int i = 0; i < values.length; i++) {
+			floatValues[3*i]   = values[i].x;
+			floatValues[3*i+1] = values[i].y;
+			floatValues[3*i+2] = values[i].z;
+		}
+		
+		bo.bufferSubData(floatValues, offset);
 	};
 }

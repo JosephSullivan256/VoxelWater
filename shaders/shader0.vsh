@@ -66,6 +66,6 @@ void main()
 	fragPos = (transform*vec4(inPos+offset,1.0)).xyz;
 	normal = inNormal;
 	gl_Position = perspective*vec4(fragPos,1.0);
-	color = col(gl_InstanceID % 11 * 7 % 5) - vec3(1,1,1)*0.3 + random(gl_InstanceID)*vec3(1,1,1)*0.4; /*gl_InstanceID % 5*/
+	color = vec3(0.2,0.6,1);
 	texCoord = inTexCoord;
 }

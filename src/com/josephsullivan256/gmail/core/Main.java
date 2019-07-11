@@ -71,7 +71,7 @@ public class Main {
 		ExtraKeyCallback keys = new ExtraKeyCallback();
 		callback.addCallback(keys);
 		
-		Level3D lvl = new Level3D(20,20,20,200);
+		Level lvl = new Level(20,20,20);
 		
 		float far = 1000f;
 		float near = 0.1f;
@@ -80,7 +80,6 @@ public class Main {
 		Utils.initGL();
 		
 		Shader blockShader = new Shader(Utils.readFile("shaders/shader0.vsh"),Utils.readFile("shaders/shader0.fsh"));
-		Shader wallShader = new Shader(Utils.readFile("shaders/shader1.vsh"),Utils.readFile("shaders/shader1.fsh"));
 		Shader shaderF0 = new Shader(Utils.readFile("shaders/shaderF0.vsh"),Utils.readFile("shaders/shaderF0.fsh"));
 		
 		Texture tex = new Texture(ImageIO.read(new File("textures/noise2.png")));
@@ -91,7 +90,7 @@ public class Main {
 				new Vec3(1f,0.8f,0.7f).scaledBy(0.9f),
 				new Vec3(1f,0.8f,0.7f).scaledBy(0.5f)));
 		
-		LevelRenderer lr = new LevelRenderer(lvl, sceneInfo, blockShader, wallShader, tex);
+		LevelRenderer lr = new LevelRenderer(lvl, sceneInfo, blockShader, tex);
 		
 		Uniform<Vec2> nearFarUniform = new Uniform<Vec2>("nf",UniformPasser.uniform2f);
 		Uniform<Vec2> dimensionsUniform = new Uniform<Vec2>("dimensions",UniformPasser.uniform2f);
@@ -120,6 +119,9 @@ public class Main {
 		GL11.glViewport(0, 0, width, height);
 		//GL11.glEnable(GL11.GL_CULL_FACE); 
 		while(!window.shouldClose()) {
+			
+			lvl.update(0.00001f);
+			lr.update(lvl.getWaterLevels());
 			
 			//bind vao
 			//use shader
